@@ -34,6 +34,16 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: "10px",
   },
+  toolbar: {
+    display: "flex",
+    gap: "10px",
+    flexDirection: "column",
+    justifyContent: "start",
+    alignItems: "start",
+  },
+  dropdownInput: {
+    width: "200px",
+  },
 }));
 
 const headCells = [
@@ -47,6 +57,7 @@ const headCells = [
 export default function Employees() {
   const classes = useStyles();
   const [recordForEdit, setRecordForEdit] = useState(null);
+  const [departmentValue, setDepartmentValue] = useState("");
   const [records, setRecords] = useState(employeeService.getAllEmployees());
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
@@ -77,6 +88,17 @@ export default function Employees() {
           return items.filter((x) =>
             x.fullName.toLowerCase().includes(target.value.toLowerCase())
           );
+      },
+    });
+  };
+
+  const handleSearchByDepartment = (e) => {
+    let target = e.target;
+    setDepartmentValue(target.value);
+    setFilterFn({
+      fn: (items) => {
+        if (target.value === "") return items;
+        else return items.filter((x) => x.departmentId === target.value);
       },
     });
   };
@@ -122,7 +144,7 @@ export default function Employees() {
         icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
       />
       <Paper className={classes.pageContent}>
-        <Toolbar>
+        <Toolbar className={classes.toolbar}>
           <Controls.Input
             label="Search Employees"
             className={classes.searchInput}
@@ -145,7 +167,19 @@ export default function Employees() {
               setRecordForEdit(null);
             }}
           />
+
+          <Controls.Select
+            name="departmentId"
+            label="Department"
+            className={classes.dropdownInput}
+            value={departmentValue}
+            onChange={handleSearchByDepartment}
+            options={employeeService
+              .getDepartmentCollection()
+              .map((item) => ({ id: item.id, title: item.name }))}
+          />
         </Toolbar>
+
         <TblContainer>
           <TblHead />
           <TableBody>
