@@ -30,6 +30,14 @@ export function deleteEmployee(id) {
   localStorage.setItem(KEYS.employees, JSON.stringify(employees));
 }
 
+export function deleteEmployees(ids) {
+  let employees = getAllEmployees();
+  ids.forEach((id) => {
+    employees = employees.filter((x) => x.id !== id);
+  });
+  localStorage.setItem(KEYS.employees, JSON.stringify(employees));
+}
+
 export function generateEmployeeId() {
   if (localStorage.getItem(KEYS.employeeId) == null)
     localStorage.setItem(KEYS.employeeId, "0");

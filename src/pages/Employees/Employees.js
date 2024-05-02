@@ -58,6 +58,7 @@ export default function Employees() {
   const classes = useStyles();
   const [recordForEdit, setRecordForEdit] = useState(null);
   const [departmentValue, setDepartmentValue] = useState("");
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
   const [records, setRecords] = useState(employeeService.getAllEmployees());
   const [filterFn, setFilterFn] = useState({
     fn: (items) => {
@@ -103,6 +104,14 @@ export default function Employees() {
     });
   };
 
+  const handleSelectEmployee = (id) => {
+    if (selectedEmployees.find((item) => item === id)) {
+      setSelectedEmployees(selectedEmployees.filter((item) => item !== id));
+    } else {
+      setSelectedEmployees([...selectedEmployees, id]);
+    }
+  };
+
   const addOrEdit = (employee, resetForm) => {
     if (employee.id === 0) employeeService.insertEmployee(employee);
     else employeeService.updateEmployee(employee);
@@ -122,13 +131,14 @@ export default function Employees() {
     setOpenPopup(true);
   };
 
-  const onDelete = (id) => {
+  const onDelete = (ids) => {
     setConfirmDialog({
       ...confirmDialog,
       isOpen: false,
     });
-    employeeService.deleteEmployee(id);
+    employeeService.deleteEmployees(ids);
     setRecords(employeeService.getAllEmployees());
+    setSelectedEmployees([]);
     setNotify({
       isOpen: true,
       message: "Deleted Successfully",
@@ -203,16 +213,29 @@ export default function Employees() {
                     onClick={() => {
                       setConfirmDialog({
                         isOpen: true,
-                        title: "Are you sure you want to delete this record?",
+                        title:
+                          "Are you sure you want to delete this record(s)?",
                         subTitle: "You can't undo this operation",
                         onConfirm: () => {
-                          onDelete(item.id);
+                          onDelete(
+                            selectedEmployees.length > 0
+                              ? selectedEmployees
+                              : [item.id]
+                          );
                         },
                       });
                     }}
                   >
                     <CloseIcon fontSize="small" />
                   </Controls.ActionButton>
+
+                  <Controls.Checkbox
+                    name="select-employee"
+                    label="Select Employee"
+                    value={!!selectedEmployees.find((id) => id === item.id)}
+                    inputProps={{ "aria-label": "controlled" }}
+                    onChange={() => handleSelectEmployee(item.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
